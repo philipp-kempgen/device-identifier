@@ -36,6 +36,20 @@ module ::DevId
 		end
 		alias :length :bytesize
 		
+		def byteslice( from, len=nil )
+			return nil  if ! raw
+			if len
+				raw.byteslice( from, len )
+			else
+				raw.byteslice( from )  # from can be a Fixnum or a Range
+			end
+		end
+		alias :'[]' :'byteslice'
+		
+		def getbyte( idx )
+			(raw || '').getbyte( idx )
+		end
+		
 		# Construct a new instance from a raw string.
 		#
 		def self.from_raw( str )
@@ -128,8 +142,6 @@ module ::DevId
 		def !~( other )
 			return ! (self =~ other)
 		end
-		
-		#TODO getbyte, [], byteslice
 		
 	end
 end
