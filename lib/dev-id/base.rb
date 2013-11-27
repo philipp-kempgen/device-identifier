@@ -1,5 +1,21 @@
-require 'dev-id'
-require 'active_model'
+#require 'dev-id'  # for DevId
+require 'active_model'  # for ActiveModel (from the "activemodel" gem)
+#if ! ::ActiveModel.const_defined?( :MassAssignmentSecurity )
+#	# ActiveModel::MassAssignmentSecurity is no longer part of the
+#	# "activemodel" gem as of version 4, but went into the
+#	# "protected_attributes" gem.
+#	begin
+#		require 'protected_attributes'
+#	rescue ::LoadError => e
+#		STDERR.puts "------------------------------------------------------------"
+#		STDERR.puts "#{e.message} (#{e.class.name})"
+#		STDERR.puts (e.backtrace || []).reject{|l| l.match( %r{ /lib/rake/ }x )}.map{|l| "  #{l}"}
+#		STDERR.puts "------------------------------------------------------------"
+#		STDERR.puts "For ActiveModel >= 4 please add the \"protected_attributes\" gem to your bundle."
+#		STDERR.puts "  ActiveModel version: #{::ActiveModel::VERSION::STRING}"
+#		STDERR.puts "------------------------------------------------------------"
+#	end
+#end
 
 module ::DevId
 	
@@ -7,7 +23,13 @@ module ::DevId
 	class BasicActiveModel
 		extend  ::ActiveModel::Naming
 		include ::ActiveModel::Validations
-		include ::ActiveModel::MassAssignmentSecurity
+		
+		if ::ActiveModel::VERSION::MAJOR <= 3
+			include ::ActiveModel::MassAssignmentSecurity
+		else
+			include ::ActiveModel::ForbiddenAttributesProtection
+		end
+		
 		include ::ActiveModel::Conversion
 	#	extend  ::ActiveModel::Callbacks
 		
@@ -24,7 +46,11 @@ module ::DevId
 			attributes = new_attributes.stringify_keys
 			
 			unless options[:without_protection]
-				attributes = sanitize_for_mass_assignment( attributes, options[:as] || :default )
+				if ::ActiveModel::VERSION::MAJOR <= 3
+					attributes = sanitize_for_mass_assignment( attributes, options[:as] || :default )
+				else
+					attributes = sanitize_for_mass_assignment( attributes )
+				end
 			end
 			
 			attributes.each { |k, v|
