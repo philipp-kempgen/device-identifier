@@ -7,9 +7,45 @@ Rationale:
 - Hard-phones have an Ethernet MAC address.
 - Soft-phones don't. They have/need some sort of identification string
   (any sequence of bytes).
-- Both are device identifiers, with the MAC address being a sub-class.
+- Soft-phones may use UUIDs as identifiers.
+- All of them are device identifiers, with the MAC address resp. UUID being sub-classes.
 
 Author: Philipp Kempgen, [http://kempgen.net](http://kempgen.net)
+
+
+## Usage
+
+	require 'dev-id'
+	
+	m = DevId::MacAddress.from_hex ""
+	m.valid?       # => false
+	
+	m = DevId::MacAddress.from_hex "001122aabbcc"
+	m.valid?       # => true
+	
+	m = DevId::MacAddress.from_hex "00:11:22:aa:bb:cc"
+	m.valid?       # => true
+	
+	m = DevId::MacAddress.from_hex "00-11-22-AA-BB-CC"
+	m.valid?       # => true
+	m.ascii        # => "001122aabbcc"
+	m.pretty       # => "00:11:22:AA:BB:CC"
+	m.to_s         # => "00:11:22:AA:BB:CC"
+	m.pretty({ :sep => '-', :upcase => false })
+                   # => "00-11-22-aa-bb-cc"
+	m.raw          # => "\x00\x11\x22\xAA\xBB\xCC"
+	m.bytes.to_a   # => [0, 17, 34, 170, 187, 204]
+	m.bytesize     # => 6
+	m.to_int       # => 73596058572
+	m.starts_with? DevId::MacAddressOui.from_hex '00:11:22'
+	               # => true
+	m.starts_with? DevId::MacAddressPartial.from_hex '00:11:22:aa'
+	               # => true
+	
+	# MacAddress specific:
+	m.null?        # => false
+	m.multicast?   # => false
+	m.oui_raw      # => "\x00\x11\x22"
 
 
 ## Inheritance
@@ -31,6 +67,10 @@ The class inheritance is as follows:
 			- **`MacAddress`**
 				
 				Model for a MAC address.
+			
+			- **`DeviceUuid`**
+				
+				Model for a device identifier UUID.
 		
 		- **`MacAddressPartial`**
 			
@@ -43,9 +83,9 @@ The class inheritance is as follows:
 
 ## Device identifiers
 
-There are 2 kinds of device identifiers: the generic `DeviceIdentifier` and the more specific `MacAddress`.
+There are 3 kinds of device identifiers: the generic `DeviceIdentifier`, and the more specific `MacAddress` and `DeviceUuid`.
 
-Both support the methods in following (amongst others):
+All of them support the methods in following (amongst others):
 
 - `bytes`
 	
@@ -100,6 +140,15 @@ Instance methods:
 - `bytesize`
 	
 	The number of bytes.
+
+- `getbyte( index )`
+	
+	Returns one of the raw bytes as an integer.
+
+- `byteslice( from, len = nil )`
+	
+	Returns a slice (sub-string) of the raw bytes.
+	`from` can be an `Integer` or a `Range` – in the latter case `len` must not be specified.
 
 - `length`
 	
@@ -161,7 +210,7 @@ Instance methods:
 
 - `null?`
 	
-	If it's a null address (all 6 bytes \x00: 00:00:00:00:00:00).
+	If it's a null address (all 6 bytes `\x00`: `00:00:00:00:00:00`).
 
 - `pretty( opts = nil )`
 
@@ -179,6 +228,38 @@ Instance methods:
 - `oui_raw`
 
 	The OUI (vendor) part (first 3 bytes) in raw format.
+
+
+### `DeviceUuid`
+
+**Inheritance**:
+`Base` >
+`BinaryAddress` >
+`DeviceIdentifier` >
+`DeviceUuid`
+
+Model for a device UUID.
+
+Instance methods:
+
+- `null?`
+	
+	If it's a null address (all bytes `\x00`: `00000000-0000-0000-0000-000000000000`).
+
+- `pretty( opts = nil )`
+
+	A pretty ASCII representation (hex format).
+	
+	Default options are:
+		
+		{
+			:sep     => '-',    # separator, typically "-"
+			:upcase  => false,  # use uppercase?
+		}
+	
+	If the default options are used this method returns the canonical UUID representation.
+
+- A couple of UUID specific methods (named `uuid`...).
 
 
 ### `MacAddressPartial`
@@ -202,5 +283,4 @@ Model for a partial MAC address.
 Model for the OUI (vendor) part of a MAC address.
 
 Validates that the raw address has a length of 3 bytes.
-
 
