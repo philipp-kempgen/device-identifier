@@ -25,11 +25,13 @@ task( :clean ) {
 desc "Run tests."
 task( :test => [] ) {
 	$:.unshift( ::File.expand_path( 'lib', ::File.dirname( __FILE__ )))
+	
 	if ::ENV['TESTCASE']
-		test_files_ = ::Dir.glob( "test/#{::ENV['TESTCASE']}.rb" )
+		test_files_glob = "{test,spec}/#{::ENV['TESTCASE']}.rb"
 	else
-		test_files_ = ::Dir.glob( "test/**/*_{test,spec}.rb" )
+		test_files_glob = "{test,spec}/**/*_{test,spec}.rb"
 	end
+	test_files_ = ::Dir.glob( test_files_glob )
 	test_files_.each { |path_|
 		load path_
 		puts "Loaded testcase #{path_}"
