@@ -4,7 +4,7 @@
 module ::DevId
 	
 	# The version of this Gem.
-	VERSION = [ 0, 0, 1 ].freeze
+	VERSION = [ 0, 0, 2 ].freeze
 	
 	# The version of this Gem as a string.
 	VERSION_STR = VERSION.map(& :to_s).join('.').freeze
