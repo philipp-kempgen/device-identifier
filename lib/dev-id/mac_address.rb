@@ -18,11 +18,19 @@ module ::DevId
 			:upcase => true,
 		}.freeze
 		
-		# Whether the MAC address is a multicast address.
+		# Whether the MAC address is a group address (multicast address).
 		#
 		def multicast?
 			return nil  if ! valid?
 			return (raw.getbyte(0).to_i % 2) != 0
+		end
+		
+		# Whether the MAC address is a local address (as compared to a global address).
+		#
+		def local?
+			return nil  if ! valid?
+			#return raw.getbyte(0).to_s(2).rjust(8,'0')[-2] == '1'
+			return ((raw.getbyte(0).to_i >> 1) % 2) != 0
 		end
 		
 		# Whether the MAC address is the "null" address (6 NULL
