@@ -19,7 +19,13 @@ spec = Gem::Specification.new { |s|
 		README.md
 	)
 	
-	s.add_dependency "activemodel", "~> 3.2" #"~> 3.2.12"
+	s.add_development_dependency "rake"
+	s.add_development_dependency "uuidtools", "~> 2.1.4"
+	
+	#s.add_dependency "activemodel", "~> 3.2.12"
+	#s.add_dependency "activemodel", "~> 3.2"
+	s.add_dependency "activemodel", ">= 3", "< 5"
+	s.add_dependency "uuidtools", "~> 2.1.4"
 	
 	# The provided functionality might more or less just as well
 	# have been built using one of the Gems in following instead
